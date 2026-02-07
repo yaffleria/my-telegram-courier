@@ -1,0 +1,31 @@
+{
+  "name": "my-telegram-courier",
+  "version": "1.0.0",
+  "description": "Telegram channel message forwarder to Discord webhooks",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "dev:watch": "tsx watch --ignore '.telegram-session.json' --ignore 'logs/**' src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "telegram",
+    "discord",
+    "webhook",
+    "forwarder"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.0",
+    "dotenv": "^16.4.0",
+    "form-data": "^4.0.5",
+    "telegram": "^2.26.22"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}
