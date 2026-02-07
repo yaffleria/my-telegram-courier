@@ -51,8 +51,12 @@ export class TelegramListener {
   }
 
   async start(): Promise<void> {
+    // StringSession은 빈 문자열('') 또는 유효한 세션 문자열만 허용
+    const sessionStr = this.sessionString.trim() || ''
+    console.log(`[Telegram] 세션 상태: ${sessionStr ? `${sessionStr.length}자 로드됨` : '새 세션 생성'}`)
+
     this.client = new TelegramClient(
-      new StringSession(this.sessionString),
+      new StringSession(sessionStr),
       this.apiId,
       this.apiHash,
       { connectionRetries: 5 }
