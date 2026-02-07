@@ -3,9 +3,9 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 // .env 파일을 직접 읽어서 멀티라인 값을 지원
-function loadEnv(): void {
+function loadEnv(): Record<string, string> | null {
   const envPath = path.resolve(process.cwd(), '.env')
-  if (!fs.existsSync(envPath)) return
+  if (!fs.existsSync(envPath)) return null
 
   const content = fs.readFileSync(envPath, 'utf-8')
   const result: Record<string, string> = {}
@@ -63,17 +63,28 @@ function loadEnv(): void {
     result[key] = value
   }
 
-  // 이미 설정된 환경변수는 덮어쓰지 않음 (Railway 등 서버 환경변수 우선)
+  // 멀티라인 파싱 결과를 process.env에 설정 (기존 시스템 환경변수는 유지)
   for (const [key, value] of Object.entries(result)) {
     if (!process.env[key]) {
       process.env[key] = value
     }
   }
+
+  return result
 }
 
-// dotenv 기본 로드 (한 줄 값 처리) + 멀티라인 커스텀 로드
+// 1. 커스텀 로더 먼저 실행 (멀티라인 JSON 지원)
+const multilineKeys = loadEnv()
+
+// 2. dotenv로 나머지 단순 값 보충 (이미 설정된 키는 덮어쓰지 않음)
 dotenv.config()
-loadEnv()
+
+// 3. 멀티라인으로 파싱된 키를 dotenv가 덮어쓴 경우 복원
+if (multilineKeys) {
+  for (const [key, value] of Object.entries(multilineKeys)) {
+    process.env[key] = value
+  }
+}
 
 export interface ChannelMapping {
   telegramChannel: string
