@@ -1,19 +1,9 @@
-import http from 'http'
 import { config } from './config'
 import { TelegramListener } from './services/telegramListener'
 import { WebhookForwarder } from './services/webhookForwarder'
 
 async function main() {
   console.log('=== Telegram Courier 시작 ===')
-
-  // Railway health check용 HTTP 서버
-  const port = process.env.PORT || 3000
-  http.createServer((_req, res) => {
-    res.writeHead(200)
-    res.end('ok')
-  }).listen(port, () => {
-    console.log(`[Health] HTTP 서버 시작 (port: ${port})`)
-  })
 
   if (config.channelMappings.length === 0) {
     console.warn('[경고] CHANNEL_MAPPINGS가 비어있습니다. 매핑을 설정해주세요.')
