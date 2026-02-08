@@ -109,6 +109,12 @@ export class TelegramListener {
       console.log("[Telegram] ============================================");
     }
 
+    // 모든 대화 목록을 가져와 엔티티 캐시 초기화
+    // (Telegram API는 "본 적 없는" 채널의 메시지를 처리할 수 없음)
+    console.log("[Telegram] 채널 목록 캐싱 중...");
+    const dialogs = await this.client.getDialogs({ limit: 500 });
+    console.log(`[Telegram] ${dialogs.length}개 대화 캐시됨`);
+
     this.registerEventHandlers();
   }
 
