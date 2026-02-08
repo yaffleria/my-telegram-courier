@@ -98,8 +98,10 @@ export class TelegramListener {
   private registerEventHandlers(): void {
     if (!this.client) throw new Error('Telegram client is not initialized')
 
-    this.client.addEventHandler(async (event: NewMessageEvent) => {
-      await this.handleNewMessage(event)
+    this.client.addEventHandler((event: NewMessageEvent) => {
+      this.handleNewMessage(event).catch((err) => {
+        console.error('[Telegram] 핸들러 에러:', err)
+      })
     }, new NewMessage({}))
 
     console.log('[Telegram] 이벤트 핸들러 등록 완료')
@@ -110,6 +112,9 @@ export class TelegramListener {
 
     try {
       const message = event.message
+
+      // peerId 원본 로그 (디버깅용)
+      console.log(`[Telegram] 이벤트 수신: peerId=${JSON.stringify(message.peerId)}, text=${(message.message || '').substring(0, 30)}...`)
 
       let chatUsername: string | undefined
       let chatTitle: string | undefined
@@ -123,8 +128,8 @@ export class TelegramListener {
           chatTitle = 'title' in chat ? (chat.title as string | undefined) : undefined
           chatId = 'id' in chat ? String(chat.id) : undefined
         }
-      } catch {
-        // fallback
+      } catch (e) {
+        console.log('[Telegram] event.getChat() 실패:', e)
       }
 
       // 방법 2: message.peerId
@@ -145,20 +150,20 @@ export class TelegramListener {
               chatUsername = 'username' in entity ? (entity.username as string | undefined) : undefined
               chatTitle = 'title' in entity ? (entity.title as string | undefined) : undefined
             }
-          } catch {
-            // fallback
+          } catch (e) {
+            console.log('[Telegram] getEntity() 실패:', e)
           }
-        } catch {
-          // fallback
+        } catch (e) {
+          console.log('[Telegram] peerId 처리 실패:', e)
         }
       }
+
+      console.log(`[Telegram] 채널 정보: username=${chatUsername}, title=${chatTitle}, id=${chatId}`)
 
       if (!chatUsername && !chatTitle && !chatId) {
         console.log('[Telegram] 채널 정보를 가져올 수 없어 건너뜁니다.')
         return
       }
-
-      console.log(`[Telegram] 메시지 수신: channel=${chatUsername || chatTitle || chatId}, text=${(message.message || '').substring(0, 50)}...`)
 
       await this.messageHandler({
         id: message.id,
