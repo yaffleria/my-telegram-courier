@@ -18,6 +18,10 @@ async function main() {
     config.telegram.session,
   );
 
+  // 폴링할 채널 목록 설정 (푸시 누락 방지용)
+  const pollChannels = config.channelMappings.map((m) => m.telegramChannel);
+  listener.setChannelsToPoll(pollChannels);
+
   const forwarder = new WebhookForwarder(config.channelMappings, () =>
     listener.getClient(),
   );
